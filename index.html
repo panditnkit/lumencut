@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LumenCut &middot; Luxury AI Clip Maker &amp; Social Auto-Publisher</title>
+  <meta name="description" content="Turn long streams into viral 9:16 Shorts with automated video-aware captions & trending hashtags, scheduled to Instagram Reels and YouTube Shorts.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient Emerald Green Glow FX -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-side"></div>
+
+  <!-- Header / Navigation -->
+  <header class="navbar">
+    <div class="container nav-content">
+      <a href="#" class="brand-logo">
+        <div class="logo-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <span class="logo-text">Lumen<span>Cut</span></span>
+        <span class="badge-luxury">PRO 2.0</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#app">Engine</a>
+        <a href="#how-to-use">How to Use</a>
+        <a href="#scheduler-section">Publishing Queue</a>
+        <a href="#features">Features</a>
+        <a href="#comparison">Compare</a>
+        <a href="#listing-guide">Deploy &amp; List</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button id="nav-connect-btn" class="btn btn-glass">Channels</button>
+        <a href="#app" class="btn btn-primary-green">Launch Engine</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-pill-badge">
+        <span class="pulse-dot"></span>
+        <span>AI Clip Extraction &middot; Video-Aware Captions &middot; Live Trending Hashtags &middot; Auto-Publisher</span>
+      </div>
+
+      <h1 class="hero-title">
+        Extract Viral Highlights &amp; <br>
+        <span class="green-gradient-text">Auto-Post With AI Captions &amp; Tags</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        LumenCut analyzes your video context, splits facecam &amp; gameplay into crisp 9:16 clips, <strong>automatically writes viral captions and injects niche-trending hashtags based on what was said in the video</strong>, then publishes to Instagram Reels and YouTube Shorts on schedule.
+      </p>
+
+      <!-- Connected Channels Bar (Glossy Black Ceramic) -->
+      <div class="social-channels-bar">
+        <!-- YouTube Channel Card -->
+        <div class="channel-card connected" id="yt-channel-card">
+          <div class="channel-icon icon-yt">▶</div>
+          <div class="channel-info">
+            <span class="channel-name" id="yt-channel-name">Gaming Highlights (42.5K)</span>
+            <span class="channel-status status-live">● YouTube Shorts Active</span>
+          </div>
+          <button class="connect-link" id="yt-toggle-btn">Manage</button>
+        </div>
+
+        <!-- Instagram Account Card -->
+        <div class="channel-card connected" id="ig-channel-card">
+          <div class="channel-icon icon-ig">📸</div>
+          <div class="channel-info">
+            <span class="channel-name" id="ig-channel-name">@streamer.moments (18.2K)</span>
+            <span class="channel-status status-live">● Instagram Reels Active</span>
+          </div>
+          <button class="connect-link" id="ig-toggle-btn">Manage</button>
+        </div>
+      </div>
+
+      <!-- App Console Container -->
+      <div id="app" class="app-console">
+        <div class="console-header">
+          <div class="console-tabs">
+            <button class="tab-btn active" data-tab="url">Stream / Video Link</button>
+            <button class="tab-btn" data-tab="upload">Local MP4 File</button>
+          </div>
+          <div class="status-indicator">
+            <span class="status-led"></span> Video-Aware AI Caption &amp; Hashtag Generator Active
+          </div>
+        </div>
+
+        <div class="console-body">
+          <div class="input-row">
+            <div class="input-wrapper">
+              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+              </svg>
+              <input type="text" id="video-url" placeholder="Paste YouTube, Twitch, Kick VOD link..." value="https://youtube.com/watch?v=valorant_champions_final_live_vod">
+              <button id="clear-btn" class="clear-btn" title="Clear">✕</button>
+            </div>
+            <button id="generate-btn" class="btn btn-cta-green">
+              <span class="btn-text">Generate Clips</span>
+            </button>
+          </div>
+
+          <!-- Quick Samples -->
+          <div class="quick-samples">
+            <span class="sample-label">Quick Test Presets:</span>
+            <button class="sample-chip" data-sample="gaming">Gaming Tournament</button>
+            <button class="sample-chip" data-sample="podcast">2-Person Podcast</button>
+            <button class="sample-chip" data-sample="esports">Esports Live Stream</button>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="controls-grid">
+            <div class="control-box">
+              <label>Caption Style</label>
+              <select id="caption-style">
+                <option value="neon-glow" selected>Emerald Mint (TikTok Viral)</option>
+                <option value="hormozi">Hormozi Gold (High Energy)</option>
+                <option value="cyber-yellow">Cyber Lime (Streamer Style)</option>
+                <option value="minimal">Clean Minimalist</option>
+              </select>
+            </div>
+
+            <div class="control-box">
+              <label>Speech Language</label>
+              <select id="language-select">
+                <option value="hinglish" selected>Hinglish (Hindi + English)</option>
+                <option value="en">English (US/UK)</option>
+                <option value="hi">Pure Hindi</option>
+                <option value="es">Spanish</option>
+              </select>
+            </div>
+
+            <div class="control-box">
+              <label>Layout Mode</label>
+              <select id="layout-mode">
+                <option value="split" selected>Split (Facecam Top + Gameplay)</option>
+                <option value="crop">Dynamic Face Tracking Crop</option>
+                <option value="blur">Blurred Background 9:16</option>
+              </select>
+            </div>
+
+            <div class="control-box">
+              <label>Auto-Publish &amp; AI Meta</label>
+              <select id="autopost-action">
+                <option value="both" selected>Auto-Generate Meta &amp; Schedule (YT + IG)</option>
+                <option value="yt">YouTube Shorts + SEO Meta</option>
+                <option value="ig">Instagram Reels + Viral Tags</option>
+                <option value="manual">Manual Export Only</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live Progress Simulator -->
+          <div id="progress-container" class="progress-container" style="display: none;">
+            <div class="progress-info">
+              <span id="progress-phase">Extracting audio track via yt-dlp...</span>
+              <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-track">
+              <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div class="pipeline-steps">
+              <span class="step step-active" id="step-1">1. Audio Rip</span>
+              <span class="step" id="step-2">2. Whisper STT</span>
+              <span class="step" id="step-3">3. Peak Hype AI</span>
+              <span class="step" id="step-4">4. 9:16 Split</span>
+              <span class="step" id="step-5">5. AI Captions &amp; Trending Tags</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Output Dashboard -->
+        <div id="results-dashboard" class="results-dashboard">
+          <div class="results-header">
+            <h3>Generated Short-Form Clips <span class="badge-count" id="clips-count">3 Ready</span></h3>
+            <span class="results-meta">AI-Engineered Captions &amp; Real-time Trending Tags Prepared</span>
+          </div>
+
+          <div class="clips-showcase-layout">
+            <!-- Left: Clips List -->
+            <div class="clips-list" id="clips-list">
+              <!-- Clip Card 1 -->
+              <div class="clip-card active" data-clip-id="1">
+                <div class="clip-thumb">
+                  <div class="thumb-preview preview-1"></div>
+                  <span class="virality-score">98/100</span>
+                  <span class="duration-badge">0:48</span>
+                </div>
+                <div class="clip-details">
+                  <h4 class="clip-title">"Wait, watch this insane 1v4 clutch!"</h4>
+                  <p class="clip-hook"><strong>Hook:</strong> Sudden audio spike + reaction shout (0:12)</p>
+                  <div class="clip-tags">
+                    <span class="tag">High Energy</span>
+                    <span class="tag">Chat Spike</span>
+                    <span class="tag tag-green">AI Meta Ready</span>
+                  </div>
+                </div>
+                <div class="clip-actions">
+                  <button class="btn-mini-schedule open-schedule-modal-btn" data-clip-idx="0">
+                    Auto-Schedule
+                  </button>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn-icon play-btn" title="Preview in Phone">▶</button>
+                    <button class="btn-icon download-btn" title="Download 1080p">⬇</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Clip Card 2 -->
+              <div class="clip-card" data-clip-id="2">
+                <div class="clip-thumb">
+                  <div class="thumb-preview preview-2"></div>
+                  <span class="virality-score">95/100</span>
+                  <span class="duration-badge">0:32</span>
+                </div>
+                <div class="clip-details">
+                  <h4 class="clip-title">"Bhai ye aim kese laga be?"</h4>
+                  <p class="clip-hook"><strong>Hook:</strong> Flick reaction kill (04:15)</p>
+                  <div class="clip-tags">
+                    <span class="tag">Hinglish</span>
+                    <span class="tag">Insane Aim</span>
+                    <span class="tag tag-green">AI Meta Ready</span>
+                  </div>
+                </div>
+                <div class="clip-actions">
+                  <button class="btn-mini-schedule open-schedule-modal-btn" data-clip-idx="1">
+                    Auto-Schedule
+                  </button>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn-icon play-btn" title="Preview in Phone">▶</button>
+                    <button class="btn-icon download-btn" title="Download 1080p">⬇</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Clip Card 3 -->
+              <div class="clip-card" data-clip-id="3">
+                <div class="clip-thumb">
+                  <div class="thumb-preview preview-3"></div>
+                  <span class="virality-score">91/100</span>
+                  <span class="duration-badge">0:45</span>
+                </div>
+                <div class="clip-details">
+                  <h4 class="clip-title">"Pure lobby ka sabse funny whiff"</h4>
+                  <p class="clip-hook"><strong>Hook:</strong> Chat laugh frequency spike + mic clipping</p>
+                  <div class="clip-tags">
+                    <span class="tag">Comedy</span>
+                    <span class="tag">Reactions</span>
+                    <span class="tag tag-green">AI Meta Ready</span>
+                  </div>
+                </div>
+                <div class="clip-actions">
+                  <button class="btn-mini-schedule open-schedule-modal-btn" data-clip-idx="2">
+                    Auto-Schedule
+                  </button>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn-icon play-btn" title="Preview in Phone">▶</button>
+                    <button class="btn-icon download-btn" title="Download 1080p">⬇</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Interactive 9:16 Phone Mockup -->
+            <div class="preview-phone-wrapper">
+              <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-screen" id="phone-screen">
+                  <!-- Streamer Facecam Top -->
+                  <div class="screen-facecam">
+                    <div class="facecam-badge">STREAMER CAM</div>
+                    <div class="avatar-speaker">
+                      <div class="avatar-ring"></div>
+                      <span class="avatar-face">😎</span>
+                    </div>
+                  </div>
+
+                  <!-- Gameplay / Main Content Bottom -->
+                  <div class="screen-gameplay">
+                    <div class="gameplay-bg-anim"></div>
+                    <div class="game-hud">1v4 CLUTCH - FINAL CIRCLE</div>
+                  </div>
+
+                  <!-- Dynamic Captions Overlay -->
+                  <div class="captions-overlay" id="captions-overlay">
+                    <span class="caption-word word-highlight" id="caption-text">WAIT, WATCH THIS!</span>
+                  </div>
+
+                  <!-- UI Overlays -->
+                  <div class="social-side-actions">
+                    <div class="action-btn">❤️ <span>48.2k</span></div>
+                    <div class="action-btn">💬 <span>1,290</span></div>
+                    <div class="action-btn">↗️ <span>Share</span></div>
+                  </div>
+
+                  <div class="bottom-sound-bar">
+                    <span class="sound-icon">🎵</span>
+                    <marquee scrollamount="3">LumenCut Auto-Engine &middot; 1080x1920 60FPS Pro Video</marquee>
+                  </div>
+                </div>
+              </div>
+
+              <div class="preview-controls">
+                <button id="modal-trigger-btn" class="btn btn-schedule-luxury">
+                  Schedule &amp; Auto-Post Selected Clip
+                </button>
+                <div class="preview-button-row">
+                  <button id="toggle-play-btn" class="btn btn-glass">Pause Demo</button>
+                  <button id="export-single-btn" class="btn btn-primary-green">Download MP4</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO USE: Step-by-Step Comprehensive Guide -->
+  <section id="how-to-use" class="how-to-use-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">USER MANUAL</span>
+        <h2 class="section-title">How to Use <span class="green-gradient-text">LumenCut</span></h2>
+        <p class="section-desc">A step-by-step master walkthrough of every single tool, setting, and automated workflow.</p>
+      </div>
+
+      <div class="guide-steps-container">
+        <!-- Step 1 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">01</div>
+          <div class="step-info-main">
+            <h3>Input Video / Stream Source</h3>
+            <p>Feed any long-form video into LumenCut. The engine uses smart audio-first ingestion so you never have to download massive 40GB files.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">URL Ingestion</span>
+              <span class="detail-desc">Paste YouTube videos, live streams, Twitch VODs, or Kick stream links.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Local Upload</span>
+              <span class="detail-desc">Drag &amp; drop local raw recordings (.mp4, .mkv, .mov) directly from your drive.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Audio-First</span>
+              <span class="detail-desc">Extracts audio in under 10 seconds to detect highlights before touching the video.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">02</div>
+          <div class="step-info-main">
+            <h3>Configure Engine Parameters</h3>
+            <p>Customize how your vertical clip looks and sounds using the four precision control boxes in the engine bar.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">Caption Style</span>
+              <span class="detail-desc">Choose between Emerald Mint (TikTok), Hormozi Gold, Cyber Lime, or Clean Minimal.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Speech Language</span>
+              <span class="detail-desc">Native support for Hinglish (Hindi written in English), pure Hindi, English, and 52+ languages.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Layout Mode</span>
+              <span class="detail-desc"><strong>Split:</strong> Puts facecam top &amp; gameplay bottom. <strong>Dynamic Crop:</strong> Tracks moving speakers.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">03</div>
+          <div class="step-info-main">
+            <h3>AI Highlight &amp; Peak Hype Detection</h3>
+            <p>Click "Generate Clips". LumenCut runs a multi-signal AI algorithm to pick viral moments without human intervention.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">Audio Volume Peaks</span>
+              <span class="detail-desc">Detects sudden decibel jumps, screaming, laughter, and high-energy excitement.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Chat Velocity</span>
+              <span class="detail-desc">Scans Twitch and YouTube chat rate spikes (e.g. 500 messages/min indicates a viral moment).</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Virality Scoring</span>
+              <span class="detail-desc">Assigns a score from 1-100 based on hook strength, pacing, and emotional payoff.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">04</div>
+          <div class="step-info-main">
+            <h3>Video-Contextual AI Captions &amp; Trending Tags</h3>
+            <p>The AI reads the spoken transcript of each clip, writes high-converting social captions, and adds niche-specific trending hashtags automatically.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">Contextual Caption</span>
+              <span class="detail-desc">Understands what happened in the clip (e.g. 1v4 clutch vs tech insight) and writes an engaging hook &amp; caption.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Live Trending Hashtags</span>
+              <span class="detail-desc">Injects trending tags matched to the exact video topic (#gaming, #esports, #podcast, #reelsindia).</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Platform Format</span>
+              <span class="detail-desc">Formats specifically for Instagram Reels (hashtags at bottom) and YouTube Shorts (clicky title + #Shorts).</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">05</div>
+          <div class="step-info-main">
+            <h3>Connect Social Accounts (1-Time Setup)</h3>
+            <p>Connect your YouTube Channel and Instagram Creator profile directly to LumenCut with zero monthly third-party subscriptions.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">YouTube Data API</span>
+              <span class="detail-desc">Uses Google Cloud OAuth 2.0 to upload shorts directly to your verified channel.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Meta Graph API</span>
+              <span class="detail-desc">Uses the official Instagram Content Publishing API to schedule Reels automatically.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Zero Cost</span>
+              <span class="detail-desc">No $30/mo Buffer or Hootsuite fee. Uses 100% free official developer endpoints.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="guide-step-card">
+          <div class="step-badge-number">06</div>
+          <div class="step-info-main">
+            <h3>Auto-Schedule &amp; Automated Background Post</h3>
+            <p>Click "Auto-Schedule" on any generated clip to open the scheduler modal and launch the automated publishing pipeline.</p>
+          </div>
+          <div class="step-options-detail">
+            <div class="detail-row">
+              <span class="detail-tag">Peak Hours Picker</span>
+              <span class="detail-desc">Select date &amp; peak audience engagement times (e.g. 7:00 PM IST for gaming).</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Automatic Metadata</span>
+              <span class="detail-desc">Title, description, caption, and trending hashtags are auto-filled and sent to the platform.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-tag">Automated Queue</span>
+              <span class="detail-desc">The clip enters your queue and publishes automatically in the background while you sleep.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Auto-Scheduled Queue Section -->
+  <section id="scheduler-section" class="scheduler-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">AUTOMATED QUEUE</span>
+        <h2 class="section-title">Active <span class="green-gradient-text">Publishing Pipeline</span></h2>
+        <p class="section-desc">Clips queued for automated broadcast with AI-generated captions &amp; trending tags.</p>
+      </div>
+
+      <div class="queue-grid" id="queue-grid">
+        <!-- Queue Item 1 -->
+        <div class="queue-card">
+          <div class="queue-top">
+            <div class="target-platforms">
+              <span class="platform-pill pill-yt">▶ YouTube Shorts</span>
+              <span class="platform-pill pill-ig">📸 Reels</span>
+            </div>
+            <span class="queue-time">Today, 7:00 PM IST</span>
+          </div>
+          <h4 class="queue-title">"Wait, watch this insane 1v4 clutch!"</h4>
+          <p class="queue-caption">Can you believe this 1v4 clutch?! Tag that teammate who always panics under pressure 👇🔥 #valorant #clutch #gamingreels #esports #1v4 #shorts #reels</p>
+          <div class="queue-footer">
+            <span class="queue-status-badge">⏳ Auto-Post Scheduled</span>
+            <span>AI Context &amp; Tags Applied</span>
+          </div>
+        </div>
+
+        <!-- Queue Item 2 -->
+        <div class="queue-card">
+          <div class="queue-top">
+            <div class="target-platforms">
+              <span class="platform-pill pill-ig">📸 Reels Only</span>
+            </div>
+            <span class="queue-time">Tomorrow, 1:00 PM IST</span>
+          </div>
+          <h4 class="queue-title">"Bhai ye aim kese laga be?"</h4>
+          <p class="queue-caption">Sensitivity settings link in bio! Kya ye lucky flick shot tha ya pure skill? Comment below 👇 #bgmi #aimgod #headshot #streamer #hinglish #viralreels</p>
+          <div class="queue-footer">
+            <span class="queue-status-badge">⏳ Auto-Post Scheduled</span>
+            <span>AI Context &amp; Tags Applied</span>
+          </div>
+        </div>
+
+        <!-- Queue Item 3 -->
+        <div class="queue-card">
+          <div class="queue-top">
+            <div class="target-platforms">
+              <span class="platform-pill pill-yt">▶ YouTube Shorts</span>
+            </div>
+            <span class="queue-time">Tomorrow, 8:30 PM IST</span>
+          </div>
+          <h4 class="queue-title">"Pure lobby ka sabse funny whiff"</h4>
+          <p class="queue-caption">Lagta hai mouse disconnect ho gaya tha lol! 😂 Drop a like if you laughed! Subscribe for daily funny fails. #Shorts #Funny #GamingMemes #Fail #Streamer</p>
+          <div class="queue-footer">
+            <span class="queue-status-badge">⏳ Auto-Post Scheduled</span>
+            <span>AI Context &amp; Tags Applied</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section features-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">CORE TECHNOLOGY</span>
+        <h2 class="section-title">Engineered for <span class="green-gradient-text">Serious Creators</span></h2>
+        <p class="section-desc">Replace 4 expensive subscriptions with one streamlined local engine.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <h3>Video-Aware AI Caption &amp; Hashtag Generator</h3>
+          <p>Scans the speech transcript of your clip to automatically write viral captions and inject high-traffic trending hashtags tailored to the video.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🚀</div>
+          <h3>Automated Multi-Platform Publisher</h3>
+          <p>Link your YouTube Channel and Instagram once. Set scheduled peak times and let LumenCut auto-post in the background.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎙️</div>
+          <h3>Audio &amp; Chat Spike Detection</h3>
+          <p>Analyzes volume changes, mic over-drive, and live stream chat velocity to pinpoint the most engaging highlights automatically.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Smart Facecam Splitter (11 Layouts)</h3>
+          <p>YOLO face tracker identifies your facecam in the corner, auto-crops it, and positions it above the gameplay for instant 9:16 layout.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">💬</div>
+          <h3>Dynamic Animated Subtitles</h3>
+          <p>Support for 52+ languages including natural Hinglish. Color pops, bounce animations, and silence-aware text rendering.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Local-First &amp; Zero Monthly Subscriptions</h3>
+          <p>No $39/mo cloud clipper fees. Runs directly on your machine with local Whisper &amp; Ollama models, or deploy to private servers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comparison Section -->
+  <section id="comparison" class="section comparison-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-kicker">COMPETITIVE EDGE</span>
+        <h2 class="section-title">How <span class="green-gradient-text">LumenCut</span> Compares</h2>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Features</th>
+              <th class="col-highlight">LumenCut (You)</th>
+              <th>OpusClip / Klap</th>
+              <th>Buffer / Hootsuite</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Video-Aware Auto Caption &amp; Trending Tags</td>
+              <td class="col-highlight text-green"><strong>Built-in Context AI</strong></td>
+              <td>Basic generic text</td>
+              <td>Manual typing only</td>
+            </tr>
+            <tr>
+              <td>All-In-One (Clip + Auto-Post)</td>
+              <td class="col-highlight text-green"><strong>Yes (Clipper + Publisher)</strong></td>
+              <td>Clipping Only</td>
+              <td>Scheduling Only (No Clipper)</td>
+            </tr>
+            <tr>
+              <td>Monthly Cost</td>
+              <td class="col-highlight text-green"><strong>$0 (100% Free &amp; Open)</strong></td>
+              <td>$19 - $49 / month</td>
+              <td>$15 - $99 / month</td>
+            </tr>
+            <tr>
+              <td>Instagram &amp; YouTube Direct Post</td>
+              <td class="col-highlight text-green"><strong>Built-in API Publisher</strong></td>
+              <td>Needs 3rd party tools</td>
+              <td>Yes</td>
+            </tr>
+            <tr>
+              <td>Hinglish Captions</td>
+              <td class="col-highlight text-green"><strong>Native Hinglish Support</strong></td>
+              <td>Poor translation</td>
+              <td>None</td>
+            </tr>
+            <tr>
+              <td>Watermark</td>
+              <td class="col-highlight text-green"><strong>Zero Watermarks</strong></td>
+              <td>Watermarked on free tier</td>
+              <td>n/a</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Listing & Launch Guide Section -->
+  <section id="listing-guide" class="section listing-guide-section">
+    <div class="container">
+      <div class="listing-box">
+        <div class="listing-header">
+          <span class="badge-luxury">DISTRIBUTION GUIDE</span>
+          <h2>Where &amp; How to <span class="green-gradient-text">List &amp; Launch LumenCut</span></h2>
+          <p>Steps to host this site and distribute the app to thousands of creators:</p>
+        </div>
+
+        <div class="listing-grid">
+          <div class="listing-card">
+            <div class="listing-step">Step 1: Free Hosting</div>
+            <h4>Deploy to GitHub Pages / Vercel</h4>
+            <p>Upload this <code>lumencut</code> folder to GitHub. In Vercel or GitHub Settings &gt; Pages, click <strong>Deploy</strong>. Your site is live at <code>yourname.github.io/lumencut</code>.</p>
+          </div>
+
+          <div class="listing-card">
+            <div class="listing-step">Step 2: Free Directory Submissions</div>
+            <h4>Submit to Top AI Aggregators</h4>
+            <p>Submit LumenCut to <strong>Product Hunt</strong>, <strong>Toolify.ai</strong>, <strong>Futurepedia</strong>, and <strong>TheresAnAIForThat</strong> to get thousands of organic users.</p>
+          </div>
+
+          <div class="listing-card">
+            <div class="listing-step">Step 3: Setup Developer APIs</div>
+            <h4>YouTube &amp; Instagram API Keys</h4>
+            <p>Use Google Cloud Console (YouTube Data API v3) and Meta for Developers (Instagram Graph API) to enable real zero-cost auto-posting.</p>
+          </div>
+
+          <div class="listing-card">
+            <div class="listing-step">Step 4: Community Launch</div>
+            <h4>Post on Reddit &amp; X</h4>
+            <p>Share clips on <code>r/Streamers</code>, <code>r/Twitch</code>, and X showcasing "How I automated my entire Shorts channel for $0" to build massive attention.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-brand">
+        <div class="brand-logo">
+          <div class="logo-badge" style="width:30px; height:30px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <span class="logo-text">Lumen<span>Cut</span></span>
+        </div>
+        <p>The free, luxury AI video highlight clipper and automated social publisher.</p>
+      </div>
+
+      <div class="footer-links">
+        <a href="#app">Engine</a>
+        <a href="#how-to-use">How to Use</a>
+        <a href="#scheduler-section">Queue</a>
+        <a href="#features">Features</a>
+        <a href="https://github.com" target="_blank">GitHub Repository</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; 2026 LumenCut AI. Engineered for creators and streamers worldwide.</p>
+    </div>
+  </footer>
+
+  <!-- Modal: Schedule & Auto-Publish -->
+  <div class="modal-overlay" id="schedule-modal">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+      <div class="modal-header">
+        <h3>Schedule &amp; Auto-Publish</h3>
+        <p>AI has auto-generated video-tailored captions &amp; trending hashtags.</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Target Social Platforms</label>
+          <div class="platform-selector-boxes">
+            <label class="platform-checkbox-label selected" id="modal-yt-box">
+              <input type="checkbox" id="modal-yt-check" checked style="display:none;">
+              <span>▶ YouTube Shorts</span>
+            </label>
+            <label class="platform-checkbox-label selected" id="modal-ig-box">
+              <input type="checkbox" id="modal-ig-check" checked style="display:none;">
+              <span>📸 Instagram Reels</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="datetime-grid">
+          <div class="form-group">
+            <label>Publish Date</label>
+            <input type="date" class="form-input" id="schedule-date" value="2026-11-23">
+          </div>
+          <div class="form-group">
+            <label>Publish Time (Peak Hour)</label>
+            <input type="time" class="form-input" id="schedule-time" value="19:00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Video Title (Click-Optimized)</label>
+          <input type="text" class="form-input" id="modal-clip-title" value="Wait, watch this insane 1v4 clutch!">
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <label>AI Video-Aware Caption &amp; Trending Hashtags</label>
+            <button type="button" class="ai-hashtag-btn" id="generate-hashtags-btn">✨ Re-Analyze Transcript &amp; Tags</button>
+          </div>
+          <textarea class="form-textarea" id="modal-clip-caption">Can you believe this 1v4 clutch?! Tag that teammate who always panics under pressure 👇🔥 #valorant #clutch #gamingreels #esports #1v4 #shorts #reels</textarea>
+        </div>
+
+        <div class="meta-tag-pills-preview" id="trending-pills-preview">
+          <!-- Dynamic Pills -->
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-glass" id="modal-cancel-btn">Cancel</button>
+        <button class="btn btn-primary-green" id="confirm-schedule-btn">Confirm &amp; Add to Queue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notice -->
+  <div class="toast-notice" id="toast-notice">
+    <span class="toast-icon">🚀</span>
+    <span class="toast-msg" id="toast-msg">Clip successfully scheduled!</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
