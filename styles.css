@@ -1807,3 +1807,124 @@ body {
     grid-template-columns: 1fr;
   }
 }
+/* Real backend status and administrator controls */
+.setup-notice,
+.admin-panel,
+.input-help,
+.empty-state {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.setup-notice {
+  margin: 20px 0 12px;
+  padding: 14px 18px;
+  border: 1px solid var(--border-highlight);
+  border-radius: 12px;
+  background: rgba(0, 255, 135, 0.045);
+}
+
+.setup-notice[data-kind="error"] {
+  border-color: rgba(248, 113, 113, 0.6);
+  color: #fecaca;
+}
+
+.setup-notice[data-kind="warning"] {
+  border-color: rgba(245, 158, 11, 0.55);
+  color: #fde68a;
+}
+
+.admin-panel {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--bg-card);
+}
+
+.admin-panel > div {
+  flex: 1 1 230px;
+}
+
+.admin-panel strong {
+  color: var(--text-primary);
+}
+
+.admin-panel.signed-in label {
+  display: none;
+}
+
+.admin-panel label {
+  display: grid;
+  gap: 5px;
+  font-size: 12px;
+}
+
+.admin-panel input,
+#video-file {
+  min-width: 180px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  border: 1px solid var(--border-gloss);
+  border-radius: 8px;
+  background: var(--bg-input);
+}
+
+.input-help {
+  margin-top: 10px;
+}
+
+.empty-state {
+  padding: 22px;
+  border: 1px dashed var(--border-gloss);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.preview-placeholder {
+  position: absolute;
+  inset: 20% 12%;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.clip-preview-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.queue-error {
+  color: #fca5a5;
+  overflow-wrap: anywhere;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.btn:disabled,
+.platform-checkbox-label.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 700px) {
+  .admin-panel {
+    align-items: stretch;
+  }
+
+  .admin-panel label,
+  .admin-panel input {
+    width: 100%;
+  }
+}

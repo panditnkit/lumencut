@@ -1,538 +1,624 @@
-// LumenCut Luxury Engine & Video-Aware AI Social Auto-Publisher
-document.addEventListener('DOMContentLoaded', () => {
-  // Elements
-  const videoUrlInput = document.getElementById('video-url');
-  const clearBtn = document.getElementById('clear-btn');
-  const generateBtn = document.getElementById('generate-btn');
-  const sampleChips = document.querySelectorAll('.sample-chip');
-  const captionStyleSelect = document.getElementById('caption-style');
-  const languageSelect = document.getElementById('language-select');
-  const progressContainer = document.getElementById('progress-container');
-  const progressBarFill = document.getElementById('progress-bar-fill');
-  const progressPercent = document.getElementById('progress-percent');
-  const progressPhase = document.getElementById('progress-phase');
-  const clipCards = document.querySelectorAll('.clip-card');
-  const captionOverlay = document.getElementById('captions-overlay');
-  const captionText = document.getElementById('caption-text');
-  const togglePlayBtn = document.getElementById('toggle-play-btn');
-  const exportBtn = document.getElementById('export-single-btn');
-  const tabBtns = document.querySelectorAll('.tab-btn');
+document.addEventListener("DOMContentLoaded", () => {
+  const $ = (selector) => document.querySelector(selector);
+  const apiBase = (window.LUMENCUT_API_URL || (
+    ["localhost", "127.0.0.1"].includes(location.hostname) ? location.origin : ""
+  )).replace(/\/+$/, "");
+  const authKey = "lumencut-admin-basic";
+  const loginPanel = $("#admin-panel");
+  const statusNotice = $("#setup-status");
+  const urlInput = $("#video-url");
+  const fileInput = $("#video-file");
+  const generateButton = $("#generate-btn");
+  const generateLabel = generateButton.querySelector(".btn-text");
+  const progressContainer = $("#progress-container");
+  const progressFill = $("#progress-bar-fill");
+  const progressPercent = $("#progress-percent");
+  const progressPhase = $("#progress-phase");
+  const clipsList = $("#clips-list");
+  const queueGrid = $("#queue-grid");
+  const scheduleModal = $("#schedule-modal");
+  const modalTitle = $("#modal-clip-title");
+  const modalCaption = $("#modal-clip-caption");
+  const accounts = { youtube: { connected: false }, instagram: { connected: false } };
+  let selectedClip = null;
+  let previewUrl = null;
+  let selectedSource = "url";
+  let jobPollTimer = null;
 
-  // Account Bar Elements
-  const ytToggleBtn = document.getElementById('yt-toggle-btn');
-  const igToggleBtn = document.getElementById('ig-toggle-btn');
-  const ytCard = document.getElementById('yt-channel-card');
-  const igCard = document.getElementById('ig-channel-card');
-  const navConnectBtn = document.getElementById('nav-connect-btn');
-
-  // Modal Elements
-  const scheduleModal = document.getElementById('schedule-modal');
-  const modalCloseBtn = document.getElementById('modal-close-btn');
-  const modalCancelBtn = document.getElementById('modal-cancel-btn');
-  const confirmScheduleBtn = document.getElementById('confirm-schedule-btn');
-  const modalTriggerBtn = document.getElementById('modal-trigger-btn');
-  const modalClipTitle = document.getElementById('modal-clip-title');
-  const modalClipCaption = document.getElementById('modal-clip-caption');
-  const generateHashtagsBtn = document.getElementById('generate-hashtags-btn');
-  const modalYtBox = document.getElementById('modal-yt-box');
-  const modalIgBox = document.getElementById('modal-ig-box');
-  const trendingPillsPreview = document.getElementById('trending-pills-preview');
-  const queueGrid = document.getElementById('queue-grid');
-  const toastNotice = document.getElementById('toast-notice');
-  const toastMsg = document.getElementById('toast-msg');
-
-  // Video-Aware Sample Data (Context-Tailored Captions & Live Trending Tags)
-  const sampleData = {
-    gaming: {
-      url: 'https://youtube.com/watch?v=valorant_champions_final_live_vod',
-      clips: [
-        {
-          id: 1,
-          title: '"Wait, watch this insane 1v4 clutch!"',
-          hook: 'Sudden audio spike + reaction shout (0:12)',
-          words: ['WAIT,', 'WATCH', 'THIS', 'INSANE', '1v4', 'CLUTCH!'],
-          avatar: '😎',
-          score: '98/100',
-          duration: '0:48',
-          tags: ['High Energy', 'Chat Spike', 'AI Meta Ready'],
-          topic: 'Valorant Clutch',
-          autoCaption: `Can you believe this 1v4 clutch?! 💀 Hands were literally shaking in the final 1v1. Tag that teammate who always panics under pressure 👇🔥\n\n#valorant #clutch #gamingreels #esports #1v4 #gamingcommunity #gamer #fps #twitchclips #shorts #reels`,
-          hashtagsList: ['#valorant', '#clutch', '#1v4', '#gamingreels', '#esports', '#shorts', '#reels', '#viralgaming']
-        },
-        {
-          id: 2,
-          title: '"Bhai ye aim kese laga be?"',
-          hook: 'Flick reaction kill (04:15)',
-          words: ['BHAI', 'YE', 'AIM', 'KESE', 'LAGA', 'BE?'],
-          avatar: '😲',
-          score: '95/100',
-          duration: '0:32',
-          tags: ['Hinglish', 'Insane Aim', 'AI Meta Ready'],
-          topic: 'BGMI Flick Headshot',
-          autoCaption: `Sensitivity settings link in bio! 🎯 Kya ye lucky flick shot tha ya pure muscle memory? Comment your sensitivity below 👇\n\n#bgmi #aimgod #headshot #pubgmobile #gamingindia #streamer #hinglish #viralreels #reelsindia`,
-          hashtagsList: ['#bgmi', '#aimgod', '#headshot', '#pubgmobile', '#streamer', '#hinglish', '#reelsindia']
-        },
-        {
-          id: 3,
-          title: '"Pure lobby ka sabse funny whiff"',
-          hook: 'Chat laugh frequency spike + mic clipping',
-          words: ['WHAT', 'WAS', 'THAT', 'WHIFF', 'BRO?!'],
-          avatar: '🤣',
-          score: '91/100',
-          duration: '0:45',
-          tags: ['Comedy', 'Reactions', 'AI Meta Ready'],
-          topic: 'Whiff & Fail Reaction',
-          autoCaption: `Lagta hai mouse disconnect ho gaya tha lol! 😂 30 bullets and not a single hit. Drop a like if you laughed! Subscribe for daily fails.\n\n#funnygaming #whiff #gamingfails #twitchfails #gamermemes #comedyreels #streamer #lol`,
-          hashtagsList: ['#funnygaming', '#whiff', '#gamingfails', '#twitchfails', '#comedyreels', '#streamer']
-        }
-      ]
-    },
-    podcast: {
-      url: 'https://youtube.com/watch?v=tech_ai_breakthrough_interview',
-      clips: [
-        {
-          id: 1,
-          title: '"The #1 mistake beginner creators make..."',
-          hook: 'High insight index + tone shift (12:40)',
-          words: ['NEVER', 'POST', 'WITHOUT', 'A', 'STRONG', 'HOOK!'],
-          avatar: '🎙️',
-          score: '97/100',
-          duration: '0:55',
-          tags: ['Educational', 'Creator Advice', 'AI Meta Ready'],
-          topic: 'Creator Growth Advice',
-          autoCaption: `Stop posting without a 3-second hook. 🧠 Your video might be gold, but if no one stops scrolling, you get 0 views. Save this for your next video! 👇\n\n#contentcreator #creatoradvice #growthtips #socialmediatips #videoediting #reelsgrowth #podcastclips #shorts`,
-          hashtagsList: ['#contentcreator', '#creatoradvice', '#growthtips', '#socialmediatips', '#podcastclips', '#reelsgrowth']
-        },
-        {
-          id: 2,
-          title: '"AI agle 2 saal me sab badal dega."',
-          hook: 'Controversial statement (28:15)',
-          words: ['AI', 'WILL', 'CHANGE', 'EVERYTHING', 'SOON.'],
-          avatar: '💡',
-          score: '93/100',
-          duration: '0:42',
-          tags: ['Hinglish', 'Future Tech', 'AI Meta Ready'],
-          topic: 'AI Disruption Insights',
-          autoCaption: `Agle 2 saal me jo AI tools use nahi karega, wo race se bahar ho jayega. 🚀 Do you agree with this prediction? Share your thoughts below! 👇\n\n#futuretech #artificialintelligence #techpodcast #automation #ai #techindia #careertips #businessgrowth`,
-          hashtagsList: ['#futuretech', '#artificialintelligence', '#techpodcast', '#automation', '#ai', '#careertips']
-        },
-        {
-          id: 3,
-          title: '"How I made $10,000 in my first month"',
-          hook: 'Monetary proof hook (45:10)',
-          words: ['FIRST', 'TEN', 'THOUSAND', 'DOLLARS', 'ONLINE.'],
-          avatar: '💰',
-          score: '90/100',
-          duration: '0:58',
-          tags: ['Money', 'Case Study', 'AI Meta Ready'],
-          topic: 'Online Business Case Study',
-          autoCaption: `The exact blueprint I used to reach $10,000 online in 30 days. No fluff, just pure execution. Check the full breakdown on YouTube! 📈\n\n#entrepreneurship #sidehustle #onlinebusiness #financialfreedom #casestudy #wealthmindset #hustle`,
-          hashtagsList: ['#entrepreneurship', '#sidehustle', '#onlinebusiness', '#casestudy', '#wealthmindset']
-        }
-      ]
-    },
-    esports: {
-      url: 'https://twitch.tv/videos/bgmi_grand_finals_day3',
-      clips: [
-        {
-          id: 1,
-          title: '"ZONE 6 MEIN 1V3 SURVIVAL!"',
-          hook: 'Caster scream + grenade kill explosion',
-          words: ['WHAT', 'A', 'NADE', 'BY', 'JONATHAN!'],
-          avatar: '🏆',
-          score: '99/100',
-          duration: '0:40',
-          tags: ['BGMI', 'Esports', 'AI Meta Ready'],
-          topic: 'BGMI Grand Finals Clutch',
-          autoCaption: `THAT GRENADE THROW WAS ILLEGAL! 💥 Jonathan single-handedly wipes the squad in Zone 6. Who is the GOAT of Indian esports? Drop your answer! 🔥\n\n#bgmi #esports #jonathangaming #bgmigrandfinals #pubgmobile #tournament #highlights #reelsindia`,
-          hashtagsList: ['#bgmi', '#esports', '#jonathangaming', '#bgmigrandfinals', '#tournament', '#highlights']
-        },
-        {
-          id: 2,
-          title: '"Aise rotate karoge toh chicken pakka"',
-          hook: 'Tactical analysis point (19:30)',
-          words: ['SMOKE', 'AUR', 'VEHICLE', 'COVER', 'USE', 'KARO!'],
-          avatar: '🔥',
-          score: '94/100',
-          duration: '0:38',
-          tags: ['Tips & Tricks', 'Hinglish', 'AI Meta Ready'],
-          topic: 'Esports Zone Rotation Strategy',
-          autoCaption: `Grand Finals level rotation guide. 🚙 Smoke screens + vehicle hard-covers can save your team 9 out of 10 times. Tag your IGL! 👇\n\n#bgmitips #esportscoaching #gameplayguide #rotation #chickenwinner #pubgindia #strategy`,
-          hashtagsList: ['#bgmitips', '#esportscoaching', '#gameplayguide', '#rotation', '#pubgindia']
-        },
-        {
-          id: 3,
-          title: '"Last man standing wins the trophy!"',
-          hook: 'Final kill reaction + crowd cheer',
-          words: ['CHAMPIONS', 'OF', 'THE', 'TOURNAMENT!'],
-          avatar: '🥇',
-          score: '92/100',
-          duration: '0:50',
-          tags: ['Trophy Moment', 'Grand Final', 'AI Meta Ready'],
-          topic: 'Trophy Winning Moment',
-          autoCaption: `THE CROWD WENT ABSOLUTELY CRAZY! 🏆 What an emotional victory for the boys. Pure goosebumps moment! Drop ❤️ for the champions.\n\n#champions #trophy #esportstournament #grandfinals #victory #gaminghistory #esportsindia`,
-          hashtagsList: ['#champions', '#trophy', '#esportstournament', '#grandfinals', '#victory']
-        }
-      ]
-    }
-  };
-
-  let activeData = sampleData.gaming;
-  let currentClipIndex = 0;
-  let wordAnimationTimer = null;
-  let isPlaying = true;
-
-  // Show Toast
-  function showToast(message, icon = '🚀') {
-    toastMsg.textContent = message;
-    document.querySelector('.toast-icon').textContent = icon;
-    toastNotice.classList.add('show');
-    setTimeout(() => {
-      toastNotice.classList.remove('show');
-    }, 3500);
+  function authHeader(credentials = sessionStorage.getItem(authKey)) {
+    return credentials ? `Basic ${credentials}` : "";
   }
 
-  // Account Toggle Handlers
-  let ytConnected = true;
-  let igConnected = true;
+  async function api(path, options = {}) {
+    if (!apiBase) throw new Error("Hosted backend URL is not set in config.js.");
+    const headers = new Headers(options.headers || {});
+    const authorization = authHeader();
+    if (authorization) headers.set("Authorization", authorization);
+    if (options.body && !(options.body instanceof FormData) && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
+    }
+    const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+    const contentType = response.headers.get("content-type") || "";
+    const payload = contentType.includes("application/json")
+      ? await response.json()
+      : await response.text();
+    if (!response.ok) {
+      if (response.status === 401) {
+        sessionStorage.removeItem(authKey);
+        updateLoginState(false);
+      }
+      const message = typeof payload === "object" && payload ? payload.detail : payload;
+      throw new Error(message || `Request failed (${response.status}).`);
+    }
+    return payload;
+  }
 
-  function toggleYt() {
-    ytConnected = !ytConnected;
-    if (ytConnected) {
-      ytCard.classList.add('connected');
-      ytCard.querySelector('.channel-status').className = 'channel-status status-live';
-      ytCard.querySelector('.channel-status').textContent = '● YouTube Shorts Active';
-      ytToggleBtn.textContent = 'Manage';
-      showToast('YouTube Channel linked successfully! (YouTube Data API v3)', '▶');
-    } else {
-      ytCard.classList.remove('connected');
-      ytCard.querySelector('.channel-status').className = 'channel-status';
-      ytCard.querySelector('.channel-status').textContent = 'Disconnected';
-      ytToggleBtn.textContent = 'Connect';
-      showToast('YouTube Channel disconnected.', 'ℹ️');
+  function showToast(message, icon = "ℹ️") {
+    $("#toast-msg").textContent = message;
+    $(".toast-icon").textContent = icon;
+    $("#toast-notice").classList.add("show");
+    window.setTimeout(() => $("#toast-notice").classList.remove("show"), 4000);
+  }
+
+  function setStatus(message, kind = "info") {
+    statusNotice.textContent = message;
+    statusNotice.dataset.kind = kind;
+  }
+
+  function updateLoginState(isLoggedIn) {
+    $("#admin-username").hidden = isLoggedIn;
+    $("#admin-password").hidden = isLoggedIn;
+    $("#admin-login-submit").hidden = isLoggedIn;
+    $("#admin-logout-btn").hidden = !isLoggedIn;
+    $("#admin-login-btn").textContent = isLoggedIn ? "Admin Signed In" : "Admin Login";
+    loginPanel.classList.toggle("signed-in", isLoggedIn);
+    if (isLoggedIn) {
+      $("#admin-username").value = "";
+      $("#admin-password").value = "";
     }
   }
 
-  function toggleIg() {
-    igConnected = !igConnected;
-    if (igConnected) {
-      igCard.classList.add('connected');
-      igCard.querySelector('.channel-status').className = 'channel-status status-live';
-      igCard.querySelector('.channel-status').textContent = '● Instagram Reels Active';
-      igToggleBtn.textContent = 'Manage';
-      showToast('Instagram Account linked successfully! (Meta Graph API)', '📸');
-    } else {
-      igCard.classList.remove('connected');
-      igCard.querySelector('.channel-status').className = 'channel-status';
-      igCard.querySelector('.channel-status').textContent = 'Disconnected';
-      igToggleBtn.textContent = 'Connect';
-      showToast('Instagram Account disconnected.', 'ℹ️');
+  async function checkBackend() {
+    if (!apiBase) {
+      setStatus("Public frontend is online, but no hosted API URL is configured yet. Set window.LUMENCUT_API_URL in config.js after deploying the backend.", "warning");
+      $("#admin-login-submit").disabled = true;
+      return;
     }
-  }
-
-  ytToggleBtn.addEventListener('click', toggleYt);
-  igToggleBtn.addEventListener('click', toggleIg);
-
-  navConnectBtn.addEventListener('click', () => {
-    showToast('Social Accounts Hub: Both YouTube and Instagram APIs are active & ready to schedule.', '🔗');
-  });
-
-  // Clear Input
-  clearBtn.addEventListener('click', () => {
-    videoUrlInput.value = '';
-    videoUrlInput.focus();
-  });
-
-  // Tab Switcher
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      if (tab === 'upload') {
-        videoUrlInput.placeholder = 'Select local .mp4, .mkv, or .mov video file...';
-        videoUrlInput.value = 'C:/Videos/my_raw_stream_2026.mp4';
+    try {
+      const health = await api("/api/status");
+      if (!health.ready) {
+        setStatus("Backend is reachable but not ready. An administrator must configure login credentials and APP_SECRET on the server.", "warning");
       } else {
-        videoUrlInput.placeholder = 'Paste YouTube, Twitch, Kick link or stream VOD...';
-        videoUrlInput.value = activeData.url;
+        const missing = [];
+        if (!health.tools.ffmpeg) missing.push("FFmpeg");
+        if (!health.tools.whisper) missing.push("Whisper");
+        setStatus(
+          missing.length
+            ? `Backend setup incomplete: install ${missing.join(" and ")} before processing videos.`
+            : "Backend is online. Sign in as administrator to process videos and manage accounts.",
+          missing.length ? "warning" : "ready",
+        );
       }
-    });
-  });
-
-  // Sample Chips Click
-  sampleChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      const type = chip.dataset.sample;
-      if (sampleData[type]) {
-        activeData = sampleData[type];
-        videoUrlInput.value = activeData.url;
-        applyClipsData(activeData.clips);
-      }
-    });
-  });
-
-  // Apply Clips Data to UI
-  function applyClipsData(clips) {
-    clipCards.forEach((card, idx) => {
-      if (clips[idx]) {
-        const item = clips[idx];
-        card.querySelector('.clip-title').textContent = item.title;
-        card.querySelector('.clip-hook').innerHTML = `<strong>Hook:</strong> ${item.hook}`;
-        card.querySelector('.virality-score').textContent = item.score;
-        card.querySelector('.duration-badge').textContent = item.duration;
-
-        const tagsContainer = card.querySelector('.clip-tags');
-        tagsContainer.innerHTML = item.tags.map(t => `<span class="tag ${t.includes('AI') ? 'tag-green' : ''}">${t}</span>`).join('');
-      }
-    });
-
-    currentClipIndex = 0;
-    selectClip(0);
+    } catch (error) {
+      setStatus(`Backend unavailable: ${error.message}`, "error");
+    }
   }
 
-  // Generate Simulation
-  generateBtn.addEventListener('click', () => {
-    const url = videoUrlInput.value.trim();
-    if (!url) {
-      alert('Please enter a stream or video URL first!');
+  function syncPlatformCheckbox(checkboxId, boxId) {
+    const checkbox = $(checkboxId);
+    const box = $(boxId);
+    if (checkbox.disabled) return;
+    checkbox.checked = !checkbox.checked;
+    box.classList.toggle("selected", checkbox.checked);
+  }
+
+  function renderAccounts(data) {
+    for (const platform of ["youtube", "instagram"]) {
+      accounts[platform] = data[platform] || { connected: false };
+      const isYoutube = platform === "youtube";
+      const card = $(isYoutube ? "#yt-channel-card" : "#ig-channel-card");
+      const button = $(isYoutube ? "#yt-toggle-btn" : "#ig-toggle-btn");
+      const name = $(isYoutube ? "#yt-channel-name" : "#ig-channel-name");
+      const state = card.querySelector(".channel-status");
+      const connected = accounts[platform].connected;
+      card.classList.toggle("connected", connected);
+      state.className = connected ? "channel-status status-live" : "channel-status";
+      state.textContent = connected ? "● Connected" : "Not connected";
+      name.textContent = connected
+        ? accounts[platform].name
+        : (isYoutube ? "YouTube account" : "Instagram professional account");
+      button.textContent = connected ? "Disconnect" : "Connect";
+      button.onclick = () => toggleAccount(platform);
+    }
+  }
+
+  async function toggleAccount(platform) {
+    try {
+      if (accounts[platform].connected) {
+        if (!window.confirm(`Disconnect the ${platform} account from LumenCut?`)) return;
+        await api(`/api/accounts/${platform}`, { method: "DELETE" });
+        showToast(`${platform} account disconnected.`);
+        await refreshAccounts();
+        return;
+      }
+      const result = await api(`/api/oauth/${platform}/start`);
+      window.location.assign(result.url);
+    } catch (error) {
+      showToast(error.message, "⚠️");
+    }
+  }
+
+  async function refreshAccounts() {
+    renderAccounts(await api("/api/accounts"));
+  }
+
+  function updateProgress(progress, phase) {
+    progressFill.style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    progressPercent.textContent = `${progress}%`;
+    progressPhase.textContent = phase;
+    const stepNumber = progress < 5 ? 1 : progress < 25 ? 2 : progress < 35 ? 3 : progress < 95 ? 4 : 5;
+    document.querySelectorAll(".pipeline-steps .step").forEach((step, index) => {
+      step.classList.toggle("step-active", index === stepNumber - 1);
+      step.classList.toggle("step-done", index < stepNumber - 1);
+    });
+  }
+
+  async function generateClips() {
+    if (!sessionStorage.getItem(authKey)) {
+      showToast("Admin sign-in karein pehle.", "🔐");
+      loginPanel.scrollIntoView({ behavior: "smooth", block: "center" });
       return;
     }
-
-    generateBtn.disabled = true;
-    generateBtn.querySelector('.btn-text').textContent = 'Processing...';
-    progressContainer.style.display = 'block';
-
-    let percent = 0;
-    progressBarFill.style.width = '0%';
-    progressPercent.textContent = '0%';
-
-    const steps = [
-      { at: 15, text: '⚡ Extracting audio track with yt-dlp...', stepId: 'step-1' },
-      { at: 35, text: '🎙️ Whisper STT transcribing full audio speech...', stepId: 'step-2' },
-      { at: 65, text: '🔥 Ollama LLM scoring viral moments & emotional peaks...', stepId: 'step-3' },
-      { at: 85, text: '📱 Reframing to 9:16 with YOLO facecam split...', stepId: 'step-4' },
-      { at: 98, text: '✨ Generating contextual captions & live trending hashtags...', stepId: 'step-5' }
-    ];
-
-    const interval = setInterval(() => {
-      percent += 2;
-      if (percent > 100) percent = 100;
-
-      progressBarFill.style.width = `${percent}%`;
-      progressPercent.textContent = `${percent}%`;
-
-      const currentStep = steps.find(s => percent <= s.at);
-      if (currentStep) {
-        progressPhase.textContent = currentStep.text;
-        document.querySelectorAll('.pipeline-steps .step').forEach(st => st.classList.remove('step-active'));
-        const stepEl = document.getElementById(currentStep.stepId);
-        if (stepEl) stepEl.classList.add('step-active');
+    const form = new FormData();
+    if (selectedSource === "file") {
+      if (!fileInput.files || !fileInput.files[0]) {
+        showToast("Pehle video file select karein.", "⚠️");
+        fileInput.click();
+        return;
       }
-
-      if (percent >= 100) {
-        clearInterval(interval);
-        progressPhase.textContent = '✅ 3 Clips Generated with Contextual Captions & Trending Tags!';
-        document.querySelectorAll('.pipeline-steps .step').forEach(st => st.classList.add('step-done'));
-
-        setTimeout(() => {
-          generateBtn.disabled = false;
-          generateBtn.querySelector('.btn-text').textContent = 'Generate Clips';
-          document.getElementById('results-dashboard').scrollIntoView({ behavior: 'smooth' });
-          showToast('Clips + Contextual Captions & Trending Tags Ready!', '✨');
-        }, 500);
-      }
-    }, 35);
-  });
-
-  // Clip Selection
-  clipCards.forEach((card, index) => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.open-schedule-modal-btn')) return;
-      selectClip(index);
-    });
-  });
-
-  function selectClip(index) {
-    clipCards.forEach(c => c.classList.remove('active'));
-    clipCards[index].classList.add('active');
-    currentClipIndex = index;
-
-    const clip = activeData.clips[index];
-    const avatarFace = document.querySelector('.avatar-face');
-    if (avatarFace) avatarFace.textContent = clip.avatar;
-
-    // Reset Caption Word Animation
-    startCaptionAnimation(clip.words);
-  }
-
-  // Subtitle Word Animation Loop
-  function startCaptionAnimation(words) {
-    if (wordAnimationTimer) clearInterval(wordAnimationTimer);
-
-    let wordIdx = 0;
-    function renderWord() {
-      if (!isPlaying) return;
-      captionText.textContent = words[wordIdx];
-      captionText.classList.remove('word-highlight');
-
-      // Add highlight to key words
-      if (wordIdx % 2 === 1 || wordIdx === words.length - 1) {
-        captionText.classList.add('word-highlight');
-      }
-
-      wordIdx = (wordIdx + 1) % words.length;
-    }
-
-    renderWord();
-    wordAnimationTimer = setInterval(renderWord, 550);
-  }
-
-  // Toggle Play / Pause Live Demo
-  togglePlayBtn.addEventListener('click', () => {
-    isPlaying = !isPlaying;
-    if (isPlaying) {
-      togglePlayBtn.textContent = 'Pause Demo';
-      startCaptionAnimation(activeData.clips[currentClipIndex].words);
+      form.append("file", fileInput.files[0]);
     } else {
-      togglePlayBtn.textContent = 'Resume Demo';
+      const sourceUrl = urlInput.value.trim();
+      if (!sourceUrl) {
+        showToast("Video URL paste karein.", "⚠️");
+        urlInput.focus();
+        return;
+      }
+      form.append("source_url", sourceUrl);
     }
-  });
-
-  // Caption Style Change (Glossy Black + Light Green)
-  captionStyleSelect.addEventListener('change', (e) => {
-    const style = e.target.value;
-    captionText.className = 'caption-word';
-
-    if (style === 'neon-glow') {
-      captionText.style.background = '#000';
-      captionText.style.color = '#00ff87';
-      captionText.style.border = '2px solid #00ff87';
-      captionText.style.boxShadow = '0 0 20px rgba(0, 255, 135, 0.4)';
-    } else if (style === 'hormozi') {
-      captionText.style.background = '#f59e0b';
-      captionText.style.color = '#000';
-      captionText.style.border = 'none';
-      captionText.style.boxShadow = '0 5px 25px rgba(245, 158, 11, 0.5)';
-    } else if (style === 'cyber-yellow') {
-      captionText.style.background = '#00ffaa';
-      captionText.style.color = '#000';
-      captionText.style.border = '2px solid #fff';
-      captionText.style.boxShadow = '0 0 25px rgba(0, 255, 170, 0.6)';
-    } else if (style === 'minimal') {
-      captionText.style.background = 'rgba(0,0,0,0.8)';
-      captionText.style.color = '#fff';
-      captionText.style.border = 'none';
-      captionText.style.boxShadow = 'none';
+    form.append("language", $("#language-select").value);
+    form.append("layout", $("#layout-mode").value);
+    form.append("caption_style", $("#caption-style").value);
+    generateButton.disabled = true;
+    generateLabel.textContent = "Uploading…";
+    progressContainer.style.display = "block";
+    updateProgress(1, "Sending video to the backend");
+    try {
+      const job = await api("/api/jobs", { method: "POST", body: form });
+      generateLabel.textContent = "Processing…";
+      pollJob(job.id);
+    } catch (error) {
+      generateButton.disabled = false;
+      generateLabel.textContent = "Generate Clips";
+      updateProgress(0, error.message);
+      showToast(error.message, "⚠️");
     }
-  });
-
-  // Export / Download Action
-  exportBtn.addEventListener('click', () => {
-    const clip = activeData.clips[currentClipIndex];
-    alert(`🎉 Downloading clip: "${clip.title}"\nFormat: 1080x1920 MP4 (60 FPS)\nIncludes: Burned-in subtitles & video-matched caption file.`);
-  });
-
-  // Schedule Modal Handling
-  function openScheduleModal(clipIdx) {
-    const clip = activeData.clips[clipIdx];
-    modalClipTitle.value = clip.title.replace(/"/g, '');
-    modalClipCaption.value = clip.autoCaption;
-
-    // Render Trending Pills
-    trendingPillsPreview.innerHTML = clip.hashtagsList.map(h => `<span class="trending-pill-chip">${h}</span>`).join('');
-
-    scheduleModal.classList.add('open');
   }
 
-  function closeScheduleModal() {
-    scheduleModal.classList.remove('open');
+  function pollJob(jobId) {
+    window.clearTimeout(jobPollTimer);
+    const poll = async () => {
+      try {
+        const job = await api(`/api/jobs/${encodeURIComponent(jobId)}`);
+        updateProgress(job.progress || 0, job.phase || job.status);
+        if (job.status === "completed") {
+          updateProgress(100, "Clips ready");
+          document.querySelectorAll(".pipeline-steps .step").forEach((step) => step.classList.add("step-done"));
+          generateButton.disabled = false;
+          generateLabel.textContent = "Generate Clips";
+          renderClips(job.clips || []);
+          showToast(`${job.clips.length} real clip(s) ready.`, "✅");
+          $("#results-dashboard").scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+        if (job.status === "failed") {
+          generateButton.disabled = false;
+          generateLabel.textContent = "Generate Clips";
+          updateProgress(job.progress || 0, `Processing failed: ${job.error || "Unknown error"}`);
+          showToast(job.error || "Video processing failed.", "⚠️");
+          return;
+        }
+        jobPollTimer = window.setTimeout(poll, 1800);
+      } catch (error) {
+        generateButton.disabled = false;
+        generateLabel.textContent = "Generate Clips";
+        updateProgress(0, `Could not read processing status: ${error.message}`);
+      }
+    };
+    poll();
   }
 
-  modalCloseBtn.addEventListener('click', closeScheduleModal);
-  modalCancelBtn.addEventListener('click', closeScheduleModal);
-  scheduleModal.addEventListener('click', (e) => {
-    if (e.target === scheduleModal) closeScheduleModal();
-  });
+  function makeButton(text, className, onClick) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = className;
+    button.textContent = text;
+    button.addEventListener("click", onClick);
+    return button;
+  }
 
-  // Open from preview phone button
-  modalTriggerBtn.addEventListener('click', () => {
-    openScheduleModal(currentClipIndex);
-  });
+  async function downloadClip(clip) {
+    try {
+      const response = await fetch(`${apiBase}${clip.downloadUrl}`, {
+        headers: { Authorization: authHeader() },
+      });
+      if (!response.ok) throw new Error("Could not download this clip.");
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `lumencut-${clip.id}.mp4`;
+      link.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      showToast(error.message, "⚠️");
+    }
+  }
 
-  // Open from clip card mini buttons
-  document.querySelectorAll('.open-schedule-modal-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const idx = parseInt(btn.dataset.clipIdx, 10);
-      selectClip(idx);
-      openScheduleModal(idx);
-    });
-  });
+  async function selectClip(clip, card) {
+    selectedClip = clip;
+    clipsList.querySelectorAll(".clip-card").forEach((item) => item.classList.remove("active"));
+    card.classList.add("active");
+    $("#clips-count").textContent = `${clipsList.querySelectorAll(".clip-card").length} Ready`;
+    $("#modal-trigger-btn").disabled = false;
+    $("#export-single-btn").disabled = false;
+    $("#toggle-play-btn").disabled = false;
+    const preview = await api(`/api/clips/${encodeURIComponent(clip.id)}/preview`);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = preview.url.startsWith("/") ? `${apiBase}${preview.url}` : preview.url;
+    const screen = $("#phone-screen");
+    const placeholder = $("#preview-placeholder");
+    if (placeholder) placeholder.remove();
+    let video = $("#clip-preview-video");
+    if (!video) {
+      video = document.createElement("video");
+      video.id = "clip-preview-video";
+      video.className = "clip-preview-video";
+      video.controls = true;
+      video.playsInline = true;
+      screen.prepend(video);
+    }
+    video.src = previewUrl;
+    $("#caption-text").textContent = clip.transcript;
+    $("#captions-overlay").style.zIndex = "3";
+    $("#toggle-play-btn").textContent = "Play preview";
+  }
 
-  // Toggle platform checkboxes in modal
-  modalYtBox.addEventListener('click', () => {
-    modalYtBox.classList.toggle('selected');
-  });
-  modalIgBox.addEventListener('click', () => {
-    modalIgBox.classList.toggle('selected');
-  });
-
-  // Generate / Re-Analyze AI Contextual Hashtags & Caption
-  generateHashtagsBtn.addEventListener('click', () => {
-    const clip = activeData.clips[currentClipIndex];
-    showToast('Re-analyzing audio transcript with Ollama...', '🧠');
-
-    setTimeout(() => {
-      const extraTags = ['#viralvideo', '#explorepage', '#trendingnow', '#fyp', '#dailyshorts', '#algorithmhack'];
-      const combined = [...clip.hashtagsList, extraTags[Math.floor(Math.random() * extraTags.length)]];
-      modalClipCaption.value = `[AI Transcript Match] ${clip.title.replace(/"/g, '')} 🔥\n\n${clip.hook}\nDrop your reaction in comments! 👇\n\n${combined.join(' ')}`;
-      trendingPillsPreview.innerHTML = combined.map(h => `<span class="trending-pill-chip">${h}</span>`).join('');
-      showToast('Contextual caption & trending hashtags refreshed!', '✨');
-    }, 400);
-  });
-
-  // Confirm Schedule Action
-  confirmScheduleBtn.addEventListener('click', () => {
-    const title = modalClipTitle.value;
-    const caption = modalClipCaption.value;
-    const date = document.getElementById('schedule-date').value;
-    const time = document.getElementById('schedule-time').value;
-
-    const isYt = modalYtBox.classList.contains('selected');
-    const isIg = modalIgBox.classList.contains('selected');
-
-    if (!isYt && !isIg) {
-      alert('Please select at least one platform (YouTube or Instagram)!');
+  function renderClips(clips) {
+    clipsList.replaceChildren();
+    if (!clips.length) {
+      clipsList.innerHTML = '<div class="empty-state">No speech highlights were found.</div>';
       return;
     }
+    clips.forEach((clip) => {
+      const card = document.createElement("div");
+      card.className = "clip-card";
+      const thumb = document.createElement("div");
+      thumb.className = "clip-thumb";
+      const background = document.createElement("div");
+      background.className = "thumb-preview";
+      const score = document.createElement("span");
+      score.className = "virality-score";
+      score.textContent = `${clip.score}/100`;
+      const duration = document.createElement("span");
+      duration.className = "duration-badge";
+      duration.textContent = `${Math.floor(clip.duration / 60)}:${String(clip.duration % 60).padStart(2, "0")}`;
+      thumb.append(background, score, duration);
 
-    // Create New Queue Card
-    const newCard = document.createElement('div');
-    newCard.className = 'queue-card';
-    newCard.innerHTML = `
-      <div class="queue-top">
-        <div class="target-platforms">
-          ${isYt ? '<span class="platform-pill pill-yt">▶ YouTube Shorts</span>' : ''}
-          ${isIg ? '<span class="platform-pill pill-ig">📸 Reels</span>' : ''}
-        </div>
-        <span class="queue-time">${date} at ${time}</span>
-      </div>
-      <h4 class="queue-title">"${title}"</h4>
-      <p class="queue-caption">${caption.slice(0, 140)}...</p>
-      <div class="queue-footer">
-        <span class="queue-status-badge">⏳ Auto-Post Scheduled</span>
-        <span>AI Context & Trending Tags Injected</span>
-      </div>
-    `;
+      const details = document.createElement("div");
+      details.className = "clip-details";
+      const title = document.createElement("h4");
+      title.className = "clip-title";
+      title.textContent = clip.title;
+      const transcript = document.createElement("p");
+      transcript.className = "clip-hook";
+      transcript.textContent = `Transcript: ${clip.transcript}`;
+      const tags = document.createElement("div");
+      tags.className = "clip-tags";
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = `${clip.start.toFixed(1)}s – ${clip.end.toFixed(1)}s`;
+      tags.append(tag);
+      details.append(title, transcript, tags);
 
-    queueGrid.prepend(newCard);
-    closeScheduleModal();
-    showToast(`Clip scheduled with video-tailored hashtags & caption on ${date} at ${time}!`, '🚀');
+      const actions = document.createElement("div");
+      actions.className = "clip-actions";
+      actions.append(
+        makeButton("Schedule", "btn-mini-schedule", () => openScheduleModal(clip)),
+        makeButton("Download MP4", "btn-icon", () => downloadClip(clip)),
+      );
+      card.append(thumb, details, actions);
+      card.addEventListener("click", () => selectClip(clip, card).catch((error) => showToast(error.message, "⚠️")));
+      actions.querySelector(".btn-mini-schedule").addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      actions.querySelector(".btn-icon").addEventListener("click", (event) => {
+        event.stopPropagation();
+      });
+      clipsList.append(card);
+    });
+    clipsList.querySelector(".clip-card").click();
+  }
 
-    // Smooth scroll to scheduler
-    document.getElementById('scheduler-section').scrollIntoView({ behavior: 'smooth' });
+  function openScheduleModal(clip) {
+    if (!sessionStorage.getItem(authKey)) {
+      showToast("Admin sign-in karein pehle.", "🔐");
+      return;
+    }
+    selectedClip = clip;
+    modalTitle.value = clip.title.slice(0, 100);
+    modalCaption.value = clip.transcript;
+    $("#modal-yt-check").checked = false;
+    $("#modal-ig-check").checked = false;
+    $("#modal-yt-check").disabled = !accounts.youtube.connected;
+    $("#modal-ig-check").disabled = !accounts.instagram.connected;
+    $("#modal-yt-box").classList.remove("selected");
+    $("#modal-ig-box").classList.remove("selected");
+    $("#modal-yt-box").classList.toggle("disabled", !accounts.youtube.connected);
+    $("#modal-ig-box").classList.toggle("disabled", !accounts.instagram.connected);
+    $("#modal-yt-box").title = accounts.youtube.connected ? "" : "Connect YouTube before scheduling";
+    $("#modal-ig-box").title = accounts.instagram.connected ? "" : "Connect Instagram before scheduling";
+    const publishAt = new Date(Date.now() + 10 * 60 * 1000);
+    publishAt.setMinutes(Math.ceil(publishAt.getMinutes() / 5) * 5, 0, 0);
+    $("#schedule-date").value = [
+      publishAt.getFullYear(),
+      String(publishAt.getMonth() + 1).padStart(2, "0"),
+      String(publishAt.getDate()).padStart(2, "0"),
+    ].join("-");
+    $("#schedule-time").value = `${String(publishAt.getHours()).padStart(2, "0")}:${String(publishAt.getMinutes()).padStart(2, "0")}`;
+    $("#trending-pills-preview").replaceChildren();
+    scheduleModal.classList.add("open");
+  }
+
+  function renderQueue(items) {
+    queueGrid.replaceChildren();
+    queueGrid.hidden = false;
+    if (!items.length) {
+      queueGrid.innerHTML = '<div class="empty-state">No scheduled posts yet.</div>';
+      return;
+    }
+    items.forEach((item) => {
+      const card = document.createElement("div");
+      card.className = "queue-card";
+      const top = document.createElement("div");
+      top.className = "queue-top";
+      const platform = document.createElement("div");
+      platform.className = "target-platforms";
+      const pill = document.createElement("span");
+      pill.className = `platform-pill ${item.platform === "youtube" ? "pill-yt" : "pill-ig"}`;
+      pill.textContent = item.platform === "youtube" ? "▶ YouTube Shorts" : "📸 Instagram Reels";
+      platform.append(pill);
+      const date = document.createElement("span");
+      date.className = "queue-time";
+      date.textContent = new Date(item.scheduled_at).toLocaleString();
+      top.append(platform, date);
+      const title = document.createElement("h4");
+      title.className = "queue-title";
+      title.textContent = item.title;
+      const caption = document.createElement("p");
+      caption.className = "queue-caption";
+      caption.textContent = item.caption;
+      const footer = document.createElement("div");
+      footer.className = "queue-footer";
+      const status = document.createElement("span");
+      status.className = "queue-status-badge";
+      status.textContent = item.status;
+      footer.append(status);
+      if (item.error) {
+        const error = document.createElement("span");
+        error.className = "queue-error";
+        error.textContent = item.error;
+        footer.append(error);
+      }
+      if (item.status === "scheduled") {
+        footer.append(makeButton("Cancel", "btn-icon", async () => {
+          try {
+            await api(`/api/schedules/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+            await refreshQueue();
+          } catch (error) {
+            showToast(error.message, "⚠️");
+          }
+        }));
+      }
+      card.append(top, title, caption, footer);
+      queueGrid.append(card);
+    });
+  }
+
+  async function refreshQueue() {
+    renderQueue(await api("/api/schedules"));
+  }
+
+  async function loadRecentClips() {
+    const jobs = await api("/api/jobs");
+    const completed = jobs.find((job) => job.status === "completed");
+    if (completed) {
+      const job = await api(`/api/jobs/${encodeURIComponent(completed.id)}`);
+      renderClips(job.clips || []);
+    } else {
+      clipsList.innerHTML = '<div class="empty-state">Your real clips will appear here after a video is processed.</div>';
+    }
+  }
+
+  async function loadAdminData() {
+    await refreshAccounts();
+    await Promise.all([loadRecentClips(), refreshQueue()]);
+  }
+
+  async function signIn() {
+    const username = $("#admin-username").value;
+    const password = $("#admin-password").value;
+    if (!username || !password) {
+      showToast("Username aur password dono required hain.", "⚠️");
+      return;
+    }
+    const encoded = btoa(unescape(encodeURIComponent(`${username}:${password}`)));
+    try {
+      await api("/api/auth/check", {
+        method: "POST",
+        headers: { Authorization: `Basic ${encoded}` },
+      });
+      sessionStorage.setItem(authKey, encoded);
+      updateLoginState(true);
+      await loadAdminData();
+      setStatus("Admin signed in. Review clips and scheduled posts before publishing.", "ready");
+      showToast("Signed in as administrator.", "✅");
+    } catch (error) {
+      sessionStorage.removeItem(authKey);
+      updateLoginState(false);
+      showToast(error.message, "⚠️");
+    }
+  }
+
+  $("#admin-login-btn").addEventListener("click", () => {
+    loginPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+    $("#admin-username").focus();
+  });
+  $("#admin-login-submit").addEventListener("click", signIn);
+  $("#admin-password").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") signIn();
+  });
+  $("#admin-logout-btn").addEventListener("click", () => {
+    sessionStorage.removeItem(authKey);
+    updateLoginState(false);
+    renderAccounts({ youtube: { connected: false }, instagram: { connected: false } });
+    renderQueue([]);
+    clipsList.innerHTML = '<div class="empty-state">Sign in to load your clips.</div>';
+    setStatus("Signed out. Your password is cleared from this browser tab.", "info");
   });
 
-  // Initialize
-  startCaptionAnimation(activeData.clips[0].words);
+  $("#nav-connect-btn").addEventListener("click", () => {
+    document.querySelector(".social-channels-bar").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
+  generateButton.addEventListener("click", generateClips);
+  $("#clear-btn").addEventListener("click", () => {
+    urlInput.value = "";
+    urlInput.focus();
+  });
+  $("#export-single-btn").addEventListener("click", () => selectedClip && downloadClip(selectedClip));
+  $("#modal-trigger-btn").addEventListener("click", () => selectedClip && openScheduleModal(selectedClip));
+  $("#toggle-play-btn").addEventListener("click", () => {
+    const video = $("#clip-preview-video");
+    if (!video) return;
+    if (video.paused) video.play();
+    else video.pause();
+    $("#toggle-play-btn").textContent = video.paused ? "Play preview" : "Pause preview";
+  });
+
+  document.querySelectorAll(".tab-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      selectedSource = button.dataset.tab;
+      const uploading = selectedSource === "upload";
+      urlInput.hidden = uploading;
+      fileInput.hidden = !uploading;
+      $("#clear-btn").hidden = uploading;
+      $("#source-help").textContent = uploading
+        ? "Upload an MP4, MOV, MKV, WebM, or M4V file. Server upload limit applies."
+        : "Supported links: YouTube, Twitch, and Kick. Use only media you own or are authorized to process.";
+    });
+  });
+  $("#modal-yt-box").addEventListener("click", (event) => {
+    event.preventDefault();
+    syncPlatformCheckbox("#modal-yt-check", "#modal-yt-box");
+  });
+  $("#modal-ig-box").addEventListener("click", (event) => {
+    event.preventDefault();
+    syncPlatformCheckbox("#modal-ig-check", "#modal-ig-box");
+  });
+  $("#generate-hashtags-btn").addEventListener("click", () => {
+    if (selectedClip) {
+      modalCaption.value = selectedClip.transcript;
+      showToast("Transcript copied to caption. Review it before publishing.", "ℹ️");
+    }
+  });
+  $("#modal-close-btn").addEventListener("click", () => scheduleModal.classList.remove("open"));
+  $("#modal-cancel-btn").addEventListener("click", () => scheduleModal.classList.remove("open"));
+  scheduleModal.addEventListener("click", (event) => {
+    if (event.target === scheduleModal) scheduleModal.classList.remove("open");
+  });
+
+  $("#confirm-schedule-btn").addEventListener("click", async () => {
+    if (!selectedClip) return;
+    const selectedPlatforms = [
+      ["youtube", $("#modal-yt-check").checked],
+      ["instagram", $("#modal-ig-check").checked],
+    ].filter(([, selected]) => selected).map(([platform]) => platform);
+    if (!selectedPlatforms.length) {
+      showToast("Select at least one platform.", "⚠️");
+      return;
+    }
+    if (selectedPlatforms.some((platform) => !accounts[platform].connected)) {
+      showToast("Connect each selected account before scheduling.", "⚠️");
+      return;
+    }
+    const localDateTime = new Date(`${$("#schedule-date").value}T${$("#schedule-time").value}`);
+    if (!Number.isFinite(localDateTime.getTime()) || localDateTime.getTime() < Date.now() + 120000) {
+      showToast("Choose a future date and time at least two minutes from now.", "⚠️");
+      return;
+    }
+    const button = $("#confirm-schedule-btn");
+    button.disabled = true;
+    const payloadBase = {
+      clipId: selectedClip.id,
+      title: modalTitle.value.trim(),
+      caption: modalCaption.value.trim(),
+      scheduledAt: localDateTime.toISOString(),
+    };
+    if (!payloadBase.title || !payloadBase.caption) {
+      button.disabled = false;
+      showToast("Title and caption are required.", "⚠️");
+      return;
+    }
+    if (selectedPlatforms.includes("instagram") && payloadBase.caption.length > 2200) {
+      button.disabled = false;
+      showToast("Instagram caption must be 2,200 characters or fewer.", "⚠️");
+      return;
+    }
+    const outcomes = await Promise.allSettled(selectedPlatforms.map((platform) =>
+      api("/api/schedules", {
+        method: "POST",
+        body: JSON.stringify({ ...payloadBase, platform }),
+      })
+    ));
+    button.disabled = false;
+    const succeeded = outcomes.filter((outcome) => outcome.status === "fulfilled").length;
+    const failed = outcomes.filter((outcome) => outcome.status === "rejected");
+    if (succeeded) {
+      scheduleModal.classList.remove("open");
+      await refreshQueue();
+      $("#scheduler-section").scrollIntoView({ behavior: "smooth" });
+      showToast(`${succeeded} post(s) scheduled.`, "✅");
+    }
+    if (failed.length) showToast(failed.map((outcome) => outcome.reason.message).join(" "), "⚠️");
+  });
+
+  $("#admin-logout-btn").hidden = true;
+  checkBackend();
+  const query = new URLSearchParams(location.search);
+  if (query.has("oauth_connected")) showToast(`${query.get("oauth_connected")} account connected.`, "✅");
+  if (query.has("oauth_error")) showToast(`${query.get("oauth_error")} authorization failed; check backend setup and platform permissions.`, "⚠️");
+  if (query.has("oauth_connected") || query.has("oauth_error")) history.replaceState(null, "", location.pathname);
+  if (sessionStorage.getItem(authKey)) {
+    updateLoginState(true);
+    api("/api/auth/check", { method: "POST" })
+      .then(loadAdminData)
+    .catch(() => {
+      sessionStorage.removeItem(authKey);
+      updateLoginState(false);
+    });
+  } else {
+    renderQueue([]);
+    clipsList.innerHTML = '<div class="empty-state">Sign in to load your clips.</div>';
+  }
 });

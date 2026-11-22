@@ -1,0 +1,17 @@
+services:
+  lumencut:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      LUMENCUT_DATA_DIR: /app/data
+    ports:
+      - "3000:3000"
+    volumes:
+      - lumencut-data:/app/data
+
+volumes:
+  lumencut-data:
